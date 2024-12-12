@@ -38,7 +38,8 @@ export async function createPost(prevState: any, formData: FormData) {
                 content: markdownContent,
                 description: description,
             });
-
+        console.log(error);
+        if (error?.code === '23505') return { error: 'A post with this slug already exists', loading: false };
         if (error) return { error: 'Failed to create post', loading: false };
 
     } catch (error) {
