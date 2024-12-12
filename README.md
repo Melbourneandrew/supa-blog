@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Simple Blog with Supabase as CMS
+This is a simple blog starter kit built with Supabase and Next.js.
 
-## Getting Started
+Posts, uploaded as markdown files, are stored in a blog_posts table in Supabase.
 
-First, run the development server:
+### Getting Started
+This command will install the dependencies and start the development server.
+```
+npm i && npm run dev
+```
+Set up your environment variables
+```
+cp .env.example .env
+```
+This command will start the Supabase server.
+```
+npx supabase start
+```
+You should see a message containing the Supabase url and anon key. Paste these into the `.env` file in `NEXT_PUBLIC_SUPABASE_URL=` and `NEXT_PUBLIC_SUPABASE_ANON_KEY=`.
 
+This command will set up the blog_posts table in Supabase using the supabase/migrations/20241208014435_setup_blog_table.sql file.
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx supabase db reset
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Adding a new post
+First, you must signup as an admin.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For saftey in production, signups are disabled by default. Enable signups by setting `NEXT_PUBLIC_ADMIN_SIGNUP_ENABLED` to `true` in the `.env` file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Navigate to `/signup` and signup.
 
-## Learn More
+Navigate to `/admin` and click the `Add New Post` button.
 
-To learn more about Next.js, take a look at the following resources:
+Fill out the form and click `Create Post`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Your new post will be created and viewable at the root of the site.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Editing the blog title, description, and author
+These are set in the `.env` file as 
+* `NEXT_PUBLIC_BLOG_TITLE`
+* `NEXT_PUBLIC_BLOG_DESCRIPTION`
+* `NEXT_PUBLIC_BLOG_AUTHOR`
