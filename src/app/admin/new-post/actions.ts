@@ -4,14 +4,27 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-export async function createPost(formData: FormData) {
+export async function createPost(prevState: any, formData: FormData) {
+    // Set loading state
+    const loadingState = { loading: true };
+
     const supabase = await createClient();
     const title = formData.get('title');
     const content = formData.get('content') as File;
     const description = formData.get('description');
+    const slug = formData.get('slug');
 
-    if (!title || !content || !description) {
-        throw new Error('Missing required fields');
+    if (!title || !content || !description || !slug) {
+        return { error: 'Missing required fields', loading: false };
+    }
+
+    // Validate slug format
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(slug.toString())) {
+        return {
+            error: 'Invalid slug format. Use only lowercase letters, numbers, and hyphens.',
+            loading: false
+        };
     }
 
     const markdownContent = await content.text();
@@ -21,17 +34,20 @@ export async function createPost(formData: FormData) {
             .from('blog_posts')
             .insert({
                 title: title,
+                slug: slug,
                 content: markdownContent,
                 description: description,
             });
 
-        if (error) throw error;
-        
-        revalidatePath('/admin');
-        revalidatePath('/blog');
+        if (error) return { error: 'Failed to create post', loading: false };
+
     } catch (error) {
         console.error('Error saving post:', error);
-        throw new Error('Failed to create post');
+        return { error: 'Failed to create post', loading: false };
     }
+
+
+    revalidatePath('/admin');
+    revalidatePath('/blog');
     redirect('/admin');
 }

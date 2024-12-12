@@ -1,12 +1,29 @@
+"use client"
+
 import { createPost } from './actions';
-import NewPostButton from './NewPostButton';
+import { useActionState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function NewPost() {
+    const [baseUrl, setBaseUrl] = useState('');
+
+    useEffect(() => {
+        setBaseUrl(window.location.origin);
+    }, []);
+
+    const [state, formAction] = useActionState(createPost, { error: '', loading: false });
+
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-2xl font-bold mb-6">Create New Post</h1>
 
-            <form className="max-w-2xl">
+            <form action={formAction} className="max-w-2xl">
+                {state?.error && (
+                    <div className="alert alert-error mb-4">
+                        <span>{state.error}</span>
+                    </div>
+                )}
+
                 <div className="form-control w-full mb-4">
                     <label className="label">
                         <span className="label-text">Post Title</span>
@@ -16,8 +33,33 @@ export default function NewPost() {
                         type="text"
                         placeholder="Enter post title"
                         className="input input-bordered w-full"
+                        onChange={(e) => {
+                            // Auto-generate slug from title
+                            const slug = e.target.value
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')
+                                .replace(/(^-|-$)/g, '');
+                            const slugInput = document.querySelector('input[name="slug"]') as HTMLInputElement;
+                            if (slugInput) slugInput.value = slug;
+                        }}
                         required
                     />
+                </div>
+
+                <div className="form-control w-full mb-4">
+                    <label className="label">
+                        <span className="label-text">URL Slug (goes in the URL bar)</span>
+                    </label>
+                    <label className="input flex items-center gap-2 p-0">
+                        {`${baseUrl}/blog/post/`}
+                        <input
+                            name="slug"
+                            type="text"
+                            placeholder="enter-url-slug"
+                            className="input input-bordered w-full"
+                            required
+                        />
+                    </label>
                 </div>
 
                 <div className="form-control w-full mb-4">
@@ -45,7 +87,14 @@ export default function NewPost() {
                     />
                 </div>
 
-                <NewPostButton formAction={createPost} />
+                <button
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={state?.loading}
+                >
+                    {state?.loading && <span className="loading loading-spinner"></span>}
+                    Create Post
+                </button>
             </form>
         </div>
     );

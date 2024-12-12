@@ -46,7 +46,7 @@ export default async function BlogPage() {
                     posts?.map((post: Post, index: number) => (
                         <>
                             <a
-                                href={`/blog/post/${post.id}`}
+                                href={`/blog/post/${post.slug}`}
                                 key={post.id}
                                 className="w-full max-w-2xl p-6 hover:bg-gray-100 transition-all duration-200 rounded-lg cursor-pointer no-underline"
                             >

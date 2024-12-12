@@ -2,15 +2,17 @@ import { createClient } from '@/utils/supabase/client'
 import Markdown from 'react-markdown'
 import { notFound } from 'next/navigation'
 
-export default async function BlogPost({ params }: { params: { id: string } }) {
-    const supabase = createClient()
-    const author = process.env.NEXT_PUBLIC_BLOG_AUTHOR
-    const { id: postId } = await params;
+export const dynamic = 'force-static'
+
+export default async function BlogPost({ params }: { params: { slug: string } }) {
+    const supabase = createClient();
+    const author = process.env.NEXT_PUBLIC_BLOG_AUTHOR;
+    const { slug } = params;
 
     const { data: post, error } = await supabase
         .from('blog_posts')
         .select('title, description, content, created_at')
-        .eq('id', postId)
+        .eq('slug', slug)
         .single()
 
     if (error || !post) {
