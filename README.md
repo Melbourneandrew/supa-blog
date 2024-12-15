@@ -1,43 +1,40 @@
-## Simple Blog with Supabase as CMS
+## Simple Blog with Next.js and Supabase as CMS
 This is a simple blog starter kit built with Supabase and Next.js.
 
-Posts, uploaded as markdown files, are stored in a blog_posts table in Supabase.
+While you can use this as a blog out of the box, it's designed to be extended and customized.
+Posts are uploaded as markdown files, and are stored in a blog_posts table in Supabase.
 
 ### Getting Started
-This command will install the dependencies and start the development server.
-```
-npm i && npm run dev
-```
-Set up your environment variables
-```
-cp .env.example .env
-```
-This command will start the Supabase server.
-```
-npx supabase start
-```
-You should see a message containing the Supabase url and anon key. Paste these into the `.env` file in `NEXT_PUBLIC_SUPABASE_URL=` and `NEXT_PUBLIC_SUPABASE_ANON_KEY=`.
 
-This command will set up the blog_posts table in Supabase using the supabase/migrations/20241208014435_setup_blog_table.sql file.
-```bash
-npx supabase db reset
-```
+1. Clone this repository
+2. Run the setup script:
+   ```bash
+   npm i && npm run setup
+   ```
 
-## Adding a new post
-First, you must signup as an admin.
+The setup script will:
+- Create a `.env` file from the template
+- Prompt you for basic blog configuration:
+  - Blog title
+  - Blog description
+  - Author name
+- Start a local Supabase instance
+- Configure your Supabase credentials automatically
+- Run database migrations
+- Create an admin user for the blog management interface
 
-For saftey in production, signups are disabled by default. Enable signups by setting `NEXT_PUBLIC_ADMIN_SIGNUP_ENABLED` to `true` in the `.env` file.
+During setup, you'll be prompted to:
+1. Enter your blog details
+2. Create an admin account by providing:
+   - Email address
+   - Password (or let the system generate one)
 
-Navigate to `/signup` and signup.
+After setup completes, you'll receive:
+- Supabase Dashboard URL for database management
+- Admin login credentials for the blog interface
+- Confirmation that all migrations have been applied
 
-Navigate to `/admin` and click the `Add New Post` button.
+Keep your admin credentials safe - you'll need them to access the blog management interface.
+Note: Public user signups are disabled by default. The only way to create a user account is through the initial setup script. This is a security measure to ensure that only authorized administrators can access the blog management interface.
 
-Fill out the form and click `Create Post`.
-
-Your new post will be created and viewable at the root of the site.
-
-## Editing the blog title, description, and author
-These are set in the `.env` file as 
-* `NEXT_PUBLIC_BLOG_TITLE`
-* `NEXT_PUBLIC_BLOG_DESCRIPTION`
-* `NEXT_PUBLIC_BLOG_AUTHOR`
+Navigate to the blog management interface at `http://localhost:3000/admin` to start creating and managing blog posts.
