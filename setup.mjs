@@ -16,9 +16,10 @@ const promptUser = (question) => {
 function updateEnvFile(updates) {
     let envContent = fs.readFileSync('.env', 'utf8');
     for (const [key, value] of Object.entries(updates)) {
+        const regex = new RegExp(`${key}=.*`, 'g');
         envContent = envContent.replace(
-            new RegExp(`${key}=".*"`, 'g'),
-            `${key}="${value}"`
+            regex,
+            `${key}=${value}`
         );
     }
     fs.writeFileSync('.env', envContent);
@@ -78,18 +79,15 @@ async function startSupabase() {
         });
     });
 
-    // Set global variables
     SUPABASE_URL = credentials.url;
     SUPABASE_ANON_KEY = credentials.anonKey;
     SUPABASE_SERVICE_KEY = credentials.serviceKey;
 
-    // Update env file
     updateEnvFile({
         'NEXT_PUBLIC_SUPABASE_URL': SUPABASE_URL,
         'NEXT_PUBLIC_SUPABASE_ANON_KEY': SUPABASE_ANON_KEY
     });
 
-    // Run migrations
     console.log('\n📦 Running database migrations...');
     await new Promise((resolve, reject) => {
         exec('npx supabase migration up', (error, stdout, stderr) => {
@@ -108,7 +106,7 @@ async function startSupabase() {
 async function createDefaultUser(email, password) {
     const supabase = createClient(
         SUPABASE_URL,
-        SUPABASE_SERVICE_KEY  // Use service role key instead of anon key
+        SUPABASE_SERVICE_KEY  // Use service role key instead of anon key to bypass signup restriction
     );
 
     const { data, error } = await supabase.auth.admin.createUser({
@@ -129,12 +127,10 @@ async function setup() {
         const template = fs.readFileSync('.env.template', 'utf8');
         fs.writeFileSync('.env', template);
 
-        // Get user input
         const blogTitle = (await promptUser('Enter your blog title: ')).trim() || 'Your Blog';
         const blogDescription = (await promptUser('Enter your blog description: ')).trim() || 'A blog about things, etc.';
         const authorName = (await promptUser('Enter author name: ')).trim() || 'Your Name';
 
-        // Update .env with user input
         updateEnvFile({
             'NEXT_PUBLIC_BLOG_TITLE': blogTitle,
             'NEXT_PUBLIC_BLOG_DESCRIPTION': blogDescription,
@@ -155,7 +151,7 @@ async function setup() {
         console.log('\n✅ Admin user created successfully!');
         console.log(`Email: ${email}`);
         console.log(`Password: ${password}`);
-        console.log('You can use these credentials to log in to the admin interface.');
+        console.log('You can use these credentials to log in to the admin interface. Make sure to save them somewhere safe!');
 
         console.log('\n✅ Setup completed successfully!');
     } catch (error) {
