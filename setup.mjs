@@ -2,7 +2,6 @@ import fs from 'fs';
 import readline from 'readline';
 import { exec } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
-
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -109,12 +108,13 @@ async function startSupabase() {
 async function createDefaultUser(email, password) {
     const supabase = createClient(
         SUPABASE_URL,
-        SUPABASE_ANON_KEY
+        SUPABASE_SERVICE_KEY  // Use service role key instead of anon key
     );
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.admin.createUser({
         email,
-        password
+        password,
+        email_confirm: true
     });
 
     if (error) {
@@ -122,24 +122,6 @@ async function createDefaultUser(email, password) {
     }
 
     return data;
-}
-
-async function disableSignups() {
-    console.log('\n🔒 Disabling public signups...');
-    const response = await fetch(`${SUPABASE_URL}/v1/projects/default/config/auth`, {
-        method: 'PATCH',
-        headers: {
-            "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ disable_signup: true })
-    });
-
-    if (response.ok) {
-        console.log('✅ Public signups disabled successfully!');
-    } else {
-        console.error("❌ Failed to disable signups:", await response.text());
-    }
 }
 
 async function setup() {
@@ -161,23 +143,19 @@ async function setup() {
 
         await startSupabase();
 
-        // Prompt for default user creation
-        const createUser = (await promptUser('\nWould you like to create a default supabase admin user? (y/n): ')).toLowerCase() === 'y';
+        console.log('\n👤 Creating an admin user for your blog...');
+        console.log('✨ This user will be able to create and manage blog posts through the admin interface.');
 
-        if (createUser) {
-            const email = (await promptUser('Enter admin email: ')).trim();
-            const userPassword = (await promptUser('Enter password (press Enter to generate one): ')).trim();
+        const email = (await promptUser('Enter admin email for blog management: ')).trim();
+        const userPassword = (await promptUser('Enter password (press Enter to generate one): ')).trim();
 
-            // Use provided password or generate a random one
-            const password = userPassword || Math.random().toString(36).slice(-12);
+        const password = userPassword || Math.random().toString(36).slice(-12);
 
-            await createDefaultUser(email, password);
-            console.log('\n✅ Default admin user created successfully!');
-            console.log(`Email: ${email}`);
-            console.log(`Password: ${password}`);
-
-            await disableSignups();
-        }
+        await createDefaultUser(email, password);
+        console.log('\n✅ Admin user created successfully!');
+        console.log(`Email: ${email}`);
+        console.log(`Password: ${password}`);
+        console.log('You can use these credentials to log in to the admin interface.');
 
         console.log('\n✅ Setup completed successfully!');
     } catch (error) {

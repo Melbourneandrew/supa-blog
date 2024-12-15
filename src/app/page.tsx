@@ -1,7 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
-import { Fragment } from 'react'
 
-// Define the Post type
 type Post = {
     id: string
     title: string
@@ -45,7 +43,7 @@ export default async function BlogPage() {
                     <p className="text-gray-600 text-center">No posts yet!</p>
                 ) : (
                     posts?.map((post: Post, index: number) => (
-                        <Fragment key={post.id}>
+                        <div key={post.id} className="contents">
                             <a
                                 href={`/blog/post/${post.slug}`}
                                 className="w-full max-w-2xl p-6 hover:bg-gray-100 transition-all duration-200 rounded-lg cursor-pointer no-underline"
@@ -63,7 +61,7 @@ export default async function BlogPage() {
                             {index < posts.length - 1 && (
                                 <div className="h-[1px] w-full max-w-2xl bg-gray-200"></div>
                             )}
-                        </Fragment>
+                        </div>
                     ))
                 )}
             </div>
